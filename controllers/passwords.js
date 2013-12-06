@@ -1,7 +1,6 @@
 const
   bcrypt = require('bcrypt'),
-  salt = bcrypt.genSaltSync(10),
-  hash = bcrypt.hashSync("my password", salt)
+  salt = bcrypt.genSaltSync(10)
 ;
 
 // More robust

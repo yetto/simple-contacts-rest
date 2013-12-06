@@ -17,7 +17,7 @@ let userSchema = new Schema({
 		type: String,
 		required: true
 	},
-	admin: Boolean,
+	perms: Array,
 	location: String,
 	meta: {
 		age: Number,

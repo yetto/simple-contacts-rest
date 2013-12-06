@@ -115,7 +115,7 @@ app.use('/app', auth);
 app.use('/REST/contacts', contacts);
 app.use('/REST/users', users);
 // ## End-points for authenticated users
-app.use('/REST/users', user);
+app.use('/REST/user', user);
 
 /*
     TEST Contact

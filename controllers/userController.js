@@ -1,8 +1,9 @@
 const
-  debug            = require('debug')('user:controller')
+  debug            = require('debug')('user:controller'),
   userModel        = require('../models/userModel.js'),
   contactModel     = require('../models/contactModel.js'),
-  paging           = require('../controllers/paging.js')
+  paging           = require('../controllers/paging.js'),
+  knowException  = require('../controllers/knowExceptions.js')
 ;
 
 /**
@@ -21,8 +22,10 @@ module.exports = {
 
         userModel.find(function (err, users) {
             if (err) {
-                return res.status(500).json({
-                    message: 'Error when getting user.',
+                let exception = knowException(err,'Error when getting user.');
+                debug(exception);
+                return res.status(exception.code).json({
+                    message: exception.message,
                     error: err
                 });
             }
@@ -39,10 +42,22 @@ module.exports = {
      */
     show: function (req, res, callback) {
 
-        let userID = req.params.id ? req.params.id : res.locals.userID;
-        debug('show',userID);
+        let query = {
+            _id  : req.body.userID || req.params.userID || res.locals.userID || null,
+            email   : req.body.email || req.params.email || res.locals.email || null
+        };
 
-        userModel.findOne({_id: userID}, function (err, user) {
+        for(var key in query){
+            if (query.hasOwnProperty(key)) {
+                if (query[key] === null)
+                    delete query[key];
+            }
+        }
+
+        debug('show',query);
+
+        userModel.findOne(query, function (err, user) {
+
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting user.',
@@ -74,15 +89,17 @@ module.exports = {
             username : req.body.username,
             email : req.body.email,
             password : req.body.password,
-            admin : req.body.admin,
+            perms : ['user:read','user:write'],
             location : req.body.location,
             meta : req.body.meta
             // _contacts : req.body._contacts
         });
         user.save(function (err, user) {
             if (err) {
-                return res.status(500).json({
-                    message: 'Error when creating user',
+                let exception = knowException(err,'Error when getting user.');
+                debug(exception);
+                return res.status(exception.code).json({
+                    message: exception.message,
                     error: err
                 });
             }

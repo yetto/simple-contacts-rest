@@ -1,52 +1,54 @@
 const
-  debug               = require('debug')('contacts:route'),
-  express             = require('express'),
-  router              = express.Router(),
-  contactController   = require('../controllers/contactController.js'),
-  userController    = require('../controllers/userController.js')
-;
+  debug = require('debug')('contacts:route'),
+  express = require('express'),
+  router = express.Router(),
+  contactController = require('../controllers/contactController.js'),
+  userController = require('../controllers/userController.js'),
+  perms = require('../controllers/jwtRoles')(debug);
 
 /*
- * Middleware
+ * GET contacts/
+ * list all contacts
  */
-router.use(function(req, res, next){
-  debug(req.body);
-  next();
+router.get('/', perms.check(perms.sets.ar), function(req, res) {
+  debug('get - contacts/');
+  contactController.list(req, res);
 });
 
 /*
- * GET
+ * GET contacts/:contactID
+ * get information from a contact
  */
-router.get('/', function (req, res) {
-    contactController.list(req, res);
+router.get('/:contactID', perms.check(perms.sets.ar), function(req, res) {
+  debug('get - contacts/:contactID');
+  contactController.show(req, res);
 });
 
 /*
- * GET
+ * POST contacts/
+ * create a contact decoupled from a user
  */
-router.get('/:contactID', function (req, res) {
-    contactController.show(req, res);
+router.post('/', perms.check(perms.sets.aw), function(req, res) {
+  debug('post - contacts/');
+  contactController.create(req, res);
 });
 
 /*
- * POST
+ * PUT contacts/:contactID
+ * update info from a contact
  */
-router.post('/', function (req, res) {
-    contactController.create(req, res);
+router.put('/:contactID', perms.check(perms.sets.aw), function(req, res) {
+  debug('put - contacts/:contactID');
+  contactController.update(req, res);
 });
 
 /*
- * PUT
+ * DELETE contacts/:contactID
+ * detele a specific contact
  */
-router.put('/:contactID', function (req, res) {
-    contactController.update(req, res);
-});
-
-/*
- * DELETE
- */
-router.delete('/:contactID', function (req, res) {
-    contactController.remove(req, res);
+router.delete('/:contactID', perms.check(perms.sets.aw), function(req, res) {
+  debug('delete - contacts/:contactID');
+  contactController.remove(req, res);
 });
 
 module.exports = router;

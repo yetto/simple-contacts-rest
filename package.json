@@ -5,7 +5,7 @@
   "scripts": {
     "start": "./bin/www",
     "stop": "killall -SIGINT contactsApp",
-    "debug": "DEBUG=app,controller,route,app:server,contacts:route,users:route,user:route,user:controller,contact:controller nodemon -L ./bin/www",
+    "debug": "DEBUG=error,app,controller,route,app:server,contacts:route,users:route,user:route,user:controller,contact:controller,auth:route nodemon -L ./bin/www",
     "verbose": "DEBUG=* ./bin/www",
     "test": "./node_modules/.bin/mocha -b --reporter spec",
     "import": "node ./data-sets/import.js"
@@ -22,6 +22,7 @@
     "express": "~4.13.4",
     "jade": "~1.11.0",
     "jsonwebtoken": "^7.1.9",
+    "lodash": "^4.15.0",
     "mongodb": "~2.2.9",
     "mongoose": "~4.6.0",
     "morgan": "~1.7.0",

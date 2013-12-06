@@ -17,9 +17,24 @@ module.exports = {
      */
     list: function(req, res, callback) {
 
+        let query = {
+            _belongsTo: req.body.userID || req.params.userID || res.locals.userID || null,
+            name: req.body.name || req.params.name || res.locals.name || null,
+            company: req.body.company || req.params.company || res.locals.company || null,
+            address: req.body.address || req.params.address || res.locals.address || null,
+            birthday: req.body.birthday || req.params.birthday || res.locals.birthday || null
+        };
+
+        for(var key in query){
+            if (query.hasOwnProperty(key)) {
+                if (query[key] === null)
+                    delete query[key];
+            }
+        }
+
         debug('list');
 
-        contactModel.find(function(err, contacts) {
+        contactModel.find(query,function(err, contacts) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting contacts.',
@@ -39,12 +54,25 @@ module.exports = {
      */
     show: function(req, res, callback) {
 
-        let contactID = req.params.contactID ? req.params.contactID : res.locals.contactID;
-        debug('show',contactID);
+        let query = {
+            _id: req.body.contactID || req.params.contactID || res.locals.contactID || null,
+            _belongsTo: req.body.userID || req.params.userID || res.locals.userID || null,
+            name: req.body.name || req.params.name || res.locals.name || null,
+            company: req.body.company || req.params.company || res.locals.company || null,
+            address: req.body.address || req.params.address || res.locals.address || null,
+            birthday: req.body.birthday || req.params.birthday || res.locals.birthday || null
+        };
 
-        contactModel.findOne({
-            _id: contactID
-        }, function(err, contact) {
+        for(var key in query){
+            if (query.hasOwnProperty(key)) {
+                if (query[key] === null)
+                    delete query[key];
+            }
+        }
+
+        debug('show',query);
+
+        contactModel.findOne(query, function(err, contact) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting contact.',
@@ -69,7 +97,10 @@ module.exports = {
      */
     create: function(req, res, callback) {
 
-        debug('create');
+
+        userID = req.body.userID || req.params.userID || res.locals.userID || null;
+
+        debug('create','userID:',userID);
 
         let contact = new contactModel({
             name: req.body.name,
@@ -83,7 +114,7 @@ module.exports = {
             address: req.body.address,
             birthday: req.body.birthday,
             notes: req.body.notes,
-            _belongsTo: req.params.contactID,
+            _belongsTo: userID,
             _users: req.body._users
         });
 
