@@ -1,5 +1,5 @@
 // API END POINTS
-// https://scotch.io/tutorials/test-a-node-restful-api-with-mocha-and-chai
+
 var
   uid = '57d866317160689f6be9cd5a',
   cid = '57d869a17160689f6be9cdbe',
@@ -38,23 +38,36 @@ for (let i = 0; i < urlArr.length; i++) {
 }
 
 function reqListener(data) {
+
   let
     url = data.currentTarget.responseURL,
     status = data.currentTarget.status,
     aa = '### '+ url + '\nStatus: ' + status +'\nLength: ' + this.responseText.length
   ;
+
   aa += '\n\n';
+
   let
     cont = document.getElementById('content'),
     content = cont.innerHTML;
   ;
+
   // append to page
   cont.innerHTML = content + aa;
   if(status === 404){
-    console.log('-----------',url);
-    console.log(JSON.parse(this.responseText));
+    console.log( '-----------',url,'\n',JSON.parse(this.responseText));
   }
+
 }
+
+
+
+
+
+
+
+
+
 
 /*
     TEST Contact

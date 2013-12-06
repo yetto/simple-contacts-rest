@@ -1,16 +1,6 @@
 const 	mongoose 	= require('mongoose'),
 		Schema   	= mongoose.Schema;
 
-/* ## ORG
-const userSchema = new Schema({
-	'username' : String,
-	'password' : String,
-	'admin' : Boolean,
-	'location' : String,
-	'meta' : String
-});
-END ORG ## */
-
 let userSchema = new Schema({
 	name: String,
 	username: {
@@ -33,7 +23,7 @@ let userSchema = new Schema({
 		age: Number,
 		website: String
 	},
-	_contacts : [{ name : String, type : String, contact_id: Schema.Types.ObjectId }]
+	_contacts : [{ name : String, contact_id: { type: Schema.Types.ObjectId , ref : 'contact' } }]
 },
 {
     timestamps: true

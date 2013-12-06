@@ -5,11 +5,11 @@ const
   userController    = require('../controllers/userController.js')
 ;
 
-let userId;
+let userID;
 
 router.use(function(req, res, next){
-  userId = '57d866317160689f6be9cd5a';
-  debug( req.path , req.body , userId );
+  userID = '57d866317160689f6be9cd5a';
+  debug( req.path , req.body , userID );
   next();
 });
 
@@ -25,7 +25,7 @@ router.use(function(req, res, next){
  * User info
  */
 router.get('/', function (req, res) {
-    userController.show(req, res, userId);
+    userController.show(req, res, userID);
 });
 
 /*
@@ -33,7 +33,7 @@ router.get('/', function (req, res) {
  * Update user info
  */
 router.put('/', function (req, res) {
-    let id = userId;
+    let id = userID;
     userController.update(req, res);
 });
 
@@ -44,7 +44,7 @@ router.put('/', function (req, res) {
  * List of all user contacts
  */
 router.get('/contacts', function (req, res) {
-    let id = userId;
+    let id = userID;
     res.json({ udi : id , ok : 'user/contacts/' });
     //userController.listContacts(req, res);
 });
@@ -54,7 +54,7 @@ router.get('/contacts', function (req, res) {
  * Creates new contact
  */
 router.post('/contacts', function (req, res) {
-    let id = userId;
+    let id = userID;
     res.json({ udi : id , ok : 'user/contacts/' , req : req.body });
     //userController.createContact(req, res);
 });
@@ -62,32 +62,31 @@ router.post('/contacts', function (req, res) {
 /* --------------------------------------------------- */
 
 /*
- * GET user/contacts/:id
+ * GET user/contacts/:contactID
  * Get contact details
  */
-router.get('/contacts/:id', function (req, res) {
-    let id = userId;
-    res.json({ udi : id , ok : 'user/contacts/:id' });
+router.get('/contacts/:contactID', function (req, res) {
+    let id = userID;
+    res.json({ udi : id , ok : 'user/contacts/:contactID' });
     //userController.createContact(req, res);
 });
 
 /*
- * PUT user/contacts/:id
+ * PUT user/contacts/:contactID
  * Update contact
  */
-router.put('/contacts/:id', function (req, res) {
-    let id = userId;
-    res.json({ udi : id , ok : 'user/contacts/:id' , req : req.body });
+router.put('/contacts/:contactID', function (req, res) {
+    let id = userID;
+    res.json({ udi : id , ok : 'user/contacts/:contactID' , req : req.body });
     //userController.createContact(req, res);
 });
 
 /*
- * DETELE user/contacts/:id
+ * DETELE user/contacts/:contactID
  * Delete contact
  */
-router.delete('/contacts/:id', function (req, res) {
-    let id = userId;
-    res.json({ udi : id , ok : 'user/contacts/:id' , del : 'ok' });
+router.delete('/contacts/:contactID', function (req, res) {
+    res.json({ udi : id , ok : 'user/contacts/:contactID' , del : 'ok' });
     //userController.createContact(req, res);
 });
 

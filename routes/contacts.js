@@ -2,9 +2,13 @@ const
   debug               = require('debug')('contacts:route'),
   express             = require('express'),
   router              = express.Router(),
-  contactController   = require('../controllers/contactController.js')
+  contactController   = require('../controllers/contactController.js'),
+  userController    = require('../controllers/userController.js')
 ;
 
+/*
+ * Middleware
+ */
 router.use(function(req, res, next){
   debug(req.body);
   next();
@@ -20,7 +24,7 @@ router.get('/', function (req, res) {
 /*
  * GET
  */
-router.get('/:id', function (req, res) {
+router.get('/:contactID', function (req, res) {
     contactController.show(req, res);
 });
 
@@ -34,14 +38,14 @@ router.post('/', function (req, res) {
 /*
  * PUT
  */
-router.put('/:id', function (req, res) {
+router.put('/:contactID', function (req, res) {
     contactController.update(req, res);
 });
 
 /*
  * DELETE
  */
-router.delete('/:id', function (req, res) {
+router.delete('/:contactID', function (req, res) {
     contactController.remove(req, res);
 });
 

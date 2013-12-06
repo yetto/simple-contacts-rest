@@ -5,8 +5,8 @@
  */
 
 const app       = require('../app'),
-      debug     = require('debug')('app:server'),
       dotenv    = require('dotenv').load(),
+      debug     = require('debug')('app:server'),
       http      = require('http');
 
 /**

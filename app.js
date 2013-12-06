@@ -14,14 +14,16 @@ const
   morgan                   = require('morgan'),
   cookieParser             = require('cookie-parser'),
   bodyParser               = require('body-parser'),
-  routes                   = require('./routes/index'),
+  index                    = require('./routes/index'),
+  auth                     = require('./routes/auth'),
+  contacts                 = require('./routes/contacts'),
   users                    = require('./routes/users'),
   user                     = require('./routes/user'),
-  contacts                 = require('./routes/contacts'),
   mongoose                 = require('mongoose'),
   path                     = require('path'),
   cors                     = require('cors'),
-  app                      = express()
+  app                      = express(),
+  jwt                      = require('jsonwebtoken')
 ;
 
 /*
@@ -43,6 +45,9 @@ function status(inf) {
   debug("app.get > env:",app.get('env'));
 }
 
+// AUTH
+app.set('superSecret', process.env.SECRET || 'CREATE_A_DOT_ENV_FILE');
+
 // ### View engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -55,6 +60,11 @@ app.use(favicon(path.join(__dirname, 'public/images', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// Find related
+// http://mongodb.github.io/node-mongodb-native/2.2/api/Collection.html#find
+// https://www.mkyong.com/mongodb/mongodb-group-count-and-sort-example/
+// https://alexanderzeitler.com/articles/mongoose-referencing-schema-in-properties-and-arrays/
 
 /*-------------------------------------------------------------------
 ### End-points for app management ###################################
@@ -98,14 +108,14 @@ get     user/export/                Offers csv download
 --------------------------------------------------------------------*/
 
 // ### App paths
-app.use('/', routes);
-
-// ## End-points for authenticated users
-app.use('/REST/user', user);
-app.use('/REST/contacts', contacts);
+app.use('/', index);
+app.use('/app', auth);
 
 // ## End-points for app management
+app.use('/REST/contacts', contacts);
 app.use('/REST/users', users);
+// ## End-points for authenticated users
+app.use('/REST/users', user);
 
 /*
     TEST Contact
@@ -155,7 +165,7 @@ app.use(function(req, res, next) {
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
-    debug(err.status, req.path, req.method);
+    debug(err, req.path, req.method);
     res.json({
       message: err.message,
       error: err.status,
