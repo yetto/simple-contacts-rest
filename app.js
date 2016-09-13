@@ -30,6 +30,8 @@ mongoose.connection.once('open', status);
 
 function status(inf) {
   debug('mongoose/mongo:',inf);
+  debug('env:',process.env.PORT,process.env.NODE_ENV,process.env.DB_URL);
+  debug("app.get > env:",app.get('env'));
 }
 
 // ### View engine setup
@@ -52,7 +54,7 @@ app.use('/REST/contacts', contacts);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  let  err = new Error('Not Found');
+  let err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
@@ -63,9 +65,13 @@ app.use(function(req, res, next) {
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
-    res.render('error', {
+    debug(err.status, req.path, req.method);
+    res.json({
       message: err.message,
-      error: err
+      error: err.status,
+      req: req.path,
+      method: req.method,
+      body: req.body
     });
   });
 }

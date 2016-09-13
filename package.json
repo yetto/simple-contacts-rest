@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "./bin/www",
-    "debug": "DEBUG=http,controller,route,app:server,contacts:route,users:route ./bin/www",
+    "debug": "DEBUG=app,controller,route,app:server,contacts:route,users:route ./bin/www",
     "verbose": "DEBUG=* ./bin/www"
   },
   "description": "REST plus Simple Front Contacts App",

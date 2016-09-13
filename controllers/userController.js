@@ -1,4 +1,4 @@
-var userModel = require('../models/userModel.js');
+const userModel = require('../models/userModel.js');
 
 /**
  * userController.js
@@ -26,7 +26,7 @@ module.exports = {
      * userController.show()
      */
     show: function (req, res) {
-        var id = req.params.id;
+        let id = req.params.id;
         userModel.findOne({_id: id}, function (err, user) {
             if (err) {
                 return res.status(500).json({
@@ -47,7 +47,12 @@ module.exports = {
      * userController.create()
      */
     create: function (req, res) {
-        var user = new userModel({			username : req.body.username,			password : req.body.password,			admin : req.body.admin,			location : req.body.location,			meta : req.body.meta
+        let user = new userModel({
+			username : req.body.username,
+			password : req.body.password,
+			admin : req.body.admin,
+			location : req.body.location,
+			meta : req.body.meta
         });
 
         user.save(function (err, user) {
@@ -65,7 +70,7 @@ module.exports = {
      * userController.update()
      */
     update: function (req, res) {
-        var id = req.params.id;
+        let id = req.params.id;
         userModel.findOne({_id: id}, function (err, user) {
             if (err) {
                 return res.status(500).json({
@@ -79,7 +84,12 @@ module.exports = {
                 });
             }
 
-            user.username = req.body.username ? req.body.username : user.username;			user.password = req.body.password ? req.body.password : user.password;			user.admin = req.body.admin ? req.body.admin : user.admin;			user.location = req.body.location ? req.body.location : user.location;			user.meta = req.body.meta ? req.body.meta : user.meta;			
+            user.username = req.body.username ? req.body.username : user.username;
+			user.password = req.body.password ? req.body.password : user.password;
+			user.admin = req.body.admin ? req.body.admin : user.admin;
+			user.location = req.body.location ? req.body.location : user.location;
+			user.meta = req.body.meta ? req.body.meta : user.meta;
+
             user.save(function (err, user) {
                 if (err) {
                     return res.status(500).json({
@@ -97,7 +107,7 @@ module.exports = {
      * userController.remove()
      */
     remove: function (req, res) {
-        var id = req.params.id;
+        let id = req.params.id;
         userModel.findByIdAndRemove(id, function (err, user) {
             if (err) {
                 return res.status(500).json({

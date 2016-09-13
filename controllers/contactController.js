@@ -1,4 +1,4 @@
-var contactModel = require('../models/contactModel.js');
+const contactModel = require('../models/contactModel.js');
 
 /**
  * contactController.js
@@ -26,7 +26,7 @@ module.exports = {
      * contactController.show()
      */
     show: function (req, res) {
-        var id = req.params.id;
+        let id = req.params.id;
         contactModel.findOne({_id: id}, function (err, contact) {
             if (err) {
                 return res.status(500).json({
@@ -47,7 +47,7 @@ module.exports = {
      * contactController.create()
      */
     create: function (req, res) {
-        var contact = new contactModel({
+        let contact = new contactModel({
 			name : req.body.name,
 			photo : req.body.photo,
 			nickname : req.body.nickname,
@@ -77,7 +77,7 @@ module.exports = {
      * contactController.update()
      */
     update: function (req, res) {
-        var id = req.params.id;
+        let id = req.params.id;
         contactModel.findOne({_id: id}, function (err, contact) {
             if (err) {
                 return res.status(500).json({
@@ -121,7 +121,7 @@ module.exports = {
      * contactController.remove()
      */
     remove: function (req, res) {
-        var id = req.params.id;
+        let id = req.params.id;
         contactModel.findByIdAndRemove(id, function (err, contact) {
             if (err) {
                 return res.status(500).json({
