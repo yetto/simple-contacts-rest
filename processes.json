@@ -1,0 +1,23 @@
+{
+  "apps" : [{
+    "name"        : "API",
+    "script"      : "node ./bin/www",
+    "watch"       : "./",
+    "watch_options" : { "usePolling" : true },
+    "log_date_format"  : "YYYY-MM-DD HH:mm Z",
+	"env" : {
+      "NODE_ENV" : "ver",
+      "DEBUG" : "*"
+    },
+	"env" : {
+      "NODE_ENV" : "dev",
+      "DEBUG" : "http,router"
+    },
+	"env_production" : {
+       "NODE_ENV": "sta"
+    },
+    "env_production" : {
+       "NODE_ENV": "prod"
+    }
+  }]
+}
