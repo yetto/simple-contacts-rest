@@ -12,7 +12,7 @@ const userSchema = new Schema({
 END ORG ## */
 
 
-const userSchema = new Schema({
+let userSchema = new Schema({
 	name: String,
 	username: {
 		type: String,
@@ -28,9 +28,10 @@ const userSchema = new Schema({
 	meta: {
 		age: Number,
 		website: String
-	},
-	created_at: Date,
-	updated_at: Date
+	}
+},
+{
+    timestamps: true
 });
 
 module.exports = mongoose.model('user', userSchema);

@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "./bin/www",
+    "debug": "DEBUG=http,controller,route,app:server,contacts:route,users:route ./bin/www",
+    "verbose": "DEBUG=* ./bin/www"
   },
   "description": "REST plus Simple Front Contacts App",
   "dependencies": {
@@ -12,6 +14,7 @@
     "cors"  : "~2.8.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.2.0",
+    "dotenv": "~2.0.0",
     "express": "~4.13.4",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",

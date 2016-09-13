@@ -2,9 +2,12 @@
 
     SIMPLE CONTACTS REST
 
+    ## TO RUN this app don't use node app.js use:
+    npm start || npm run-script debugs
+
 ############################## */
 
-const debug                    = require('debug')('http'),
+const debug                    = require('debug')('app'),
       express                  = require('express'),
       favicon                  = require('serve-favicon'),
       morgan                   = require('morgan'),
@@ -12,29 +15,40 @@ const debug                    = require('debug')('http'),
       bodyParser               = require('body-parser'),
       routes                   = require('./routes/index'),
       users                    = require('./routes/users'),
-      contact                  = require('./routes/contact'),
+      contacts                 = require('./routes/contacts'),
       mongoose                 = require('mongoose'),
+      path                     = require('path'),
+      cors                     = require('cors'),
       app                      = express();
 
 // ## MONGO DB CONNECTION
-mongoose.connect("mongodb://localhost/contactsApp");
+
+mongoose.connect(process.env.DB_URL || "mongodb://localhost/contactsApp");
+
+mongoose.connection.on('error', status);
+mongoose.connection.once('open', status);
+
+function status(inf) {
+  debug('mongoose/mongo:',inf);
+}
 
 // ### View engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // ### App main middleware setup
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(morgan('tiny'));
 app.use(cors());
 app.options('*', cors());
+app.use(favicon(path.join(__dirname, 'public/images', 'favicon.ico')));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // ### App paths
 app.use('/', routes);
 app.use('/REST/users', users);
-app.use('/REST/contact', contact);
+app.use('/REST/contacts', contacts);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

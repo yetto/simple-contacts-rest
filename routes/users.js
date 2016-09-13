@@ -1,6 +1,12 @@
-const 	express 			= require('express')
+const 	debug           	= require('debug')('users:route'),
+		express 			= require('express')
 		router 				= express.Router()
 		userController 		= require('../controllers/userController.js');
+
+router.use(function(req, res, next){
+  debug(req.body);
+  next();
+});
 
 /*
  * GET

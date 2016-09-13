@@ -47,7 +47,19 @@ module.exports = {
      * contactController.create()
      */
     create: function (req, res) {
-        var contact = new contactModel({			name : req.body.name,			photo : req.body.photo,			nickname : req.body.nickname,			company : req.body.company,			jobtitle : req.body.jobtitle,			home : req.body.home,			email : req.body.email,			mobile : req.body.mobile,			address : req.body.address,			birthday : req.body.birthday,			notes : req.body.notes,			owner : req.body.owner
+        var contact = new contactModel({
+			name : req.body.name,
+			photo : req.body.photo,
+			nickname : req.body.nickname,
+			company : req.body.company,
+			jobtitle : req.body.jobtitle,
+			home : req.body.home,
+			email : req.body.email,
+			mobile : req.body.mobile,
+			address : req.body.address,
+			birthday : req.body.birthday,
+			notes : req.body.notes,
+			owner : req.body.owner
         });
 
         contact.save(function (err, contact) {
@@ -79,7 +91,19 @@ module.exports = {
                 });
             }
 
-            contact.name = req.body.name ? req.body.name : contact.name;			contact.photo = req.body.photo ? req.body.photo : contact.photo;			contact.nickname = req.body.nickname ? req.body.nickname : contact.nickname;			contact.company = req.body.company ? req.body.company : contact.company;			contact.jobtitle = req.body.jobtitle ? req.body.jobtitle : contact.jobtitle;			contact.home = req.body.home ? req.body.home : contact.home;			contact.email = req.body.email ? req.body.email : contact.email;			contact.mobile = req.body.mobile ? req.body.mobile : contact.mobile;			contact.address = req.body.address ? req.body.address : contact.address;			contact.birthday = req.body.birthday ? req.body.birthday : contact.birthday;			contact.notes = req.body.notes ? req.body.notes : contact.notes;			contact.owner = req.body.owner ? req.body.owner : contact.owner;			
+            contact.name = req.body.name ? req.body.name : contact.name;
+			contact.photo = req.body.photo ? req.body.photo : contact.photo;
+			contact.nickname = req.body.nickname ? req.body.nickname : contact.nickname;
+			contact.company = req.body.company ? req.body.company : contact.company;
+			contact.jobtitle = req.body.jobtitle ? req.body.jobtitle : contact.jobtitle;
+			contact.home = req.body.home ? req.body.home : contact.home;
+			contact.email = req.body.email ? req.body.email : contact.email;
+			contact.mobile = req.body.mobile ? req.body.mobile : contact.mobile;
+			contact.address = req.body.address ? req.body.address : contact.address;
+			contact.birthday = req.body.birthday ? req.body.birthday : contact.birthday;
+			contact.notes = req.body.notes ? req.body.notes : contact.notes;
+			contact.owner = req.body.owner ? req.body.owner : contact.owner;
+
             contact.save(function (err, contact) {
                 if (err) {
                     return res.status(500).json({
