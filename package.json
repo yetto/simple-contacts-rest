@@ -4,22 +4,29 @@
   "private": true,
   "scripts": {
     "start": "./bin/www",
-    "debug": "DEBUG=app,controller,route,app:server,contacts:route,users:route ./bin/www",
-    "verbose": "DEBUG=* ./bin/www"
+    "stop": "killall -SIGINT contactsApp",
+    "debug": "DEBUG=app,controller,route,app:server,contacts:route,users:route,user:route,user:controller ./bin/www",
+    "verbose": "DEBUG=* ./bin/www",
+    "test": "./node_modules/.bin/mocha -b --reporter spec"
   },
   "description": "REST plus Simple Front Contacts App",
   "dependencies": {
-    "bluebird" : "~3.3.5",
+    "bluebird": "~3.3.5",
     "body-parser": "~1.15.1",
-    "cors"  : "~2.8.0",
+    "cors": "~2.8.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.2.0",
     "dotenv": "~2.0.0",
     "express": "~4.13.4",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
-    "mongodb" : "~2.2.9",
-    "mongoose" : "~4.6.0",
+    "mongodb": "~2.2.9",
+    "mongoose": "~4.6.0",
     "serve-favicon": "~2.3.0"
+  },
+  "devDependencies": {
+    "mocha": "^3.0.2",
+    "should": "^11.1.0",
+    "supertest": "^2.0.0"
   }
 }

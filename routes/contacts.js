@@ -1,7 +1,9 @@
-const 	debug           	= require('debug')('contacts:route'),
-		express 			= require('express'),
-		router 				= express.Router(),
-		contactController 	= require('../controllers/contactController.js');
+const
+  debug               = require('debug')('contacts:route'),
+  express             = require('express'),
+  router              = express.Router(),
+  contactController   = require('../controllers/contactController.js')
+;
 
 router.use(function(req, res, next){
   debug(req.body);

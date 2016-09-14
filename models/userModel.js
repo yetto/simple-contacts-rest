@@ -11,10 +11,14 @@ const userSchema = new Schema({
 });
 END ORG ## */
 
-
 let userSchema = new Schema({
 	name: String,
 	username: {
+		type: String,
+		required: true,
+		unique: true
+	},
+	email: {
 		type: String,
 		required: true,
 		unique: true
@@ -28,7 +32,8 @@ let userSchema = new Schema({
 	meta: {
 		age: Number,
 		website: String
-	}
+	},
+	_contacts : [{ name : String, type : String, contact_id: Schema.Types.ObjectId }]
 },
 {
     timestamps: true

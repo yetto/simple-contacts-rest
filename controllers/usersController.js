@@ -1,5 +1,4 @@
 const
-  debug            = require('debug')('user:controller')
   userModel        = require('../models/userModel.js'),
   contactModel     = require('../models/contactModel.js'),
   paging           = require('../controllers/paging.js')
@@ -68,7 +67,8 @@ module.exports = {
     /**
      * userController.show()
      */
-    show: function (req, res, id) {
+    show: function (req, res) {
+        let id = req.params.id;
         userModel.findOne({_id: id}, function (err, user) {
             if (err) {
                 return res.status(500).json({
@@ -90,11 +90,14 @@ module.exports = {
      */
     create: function (req, res) {
         let user = new userModel({
+            name : req.body.name,
             username : req.body.username,
+            email : req.body.email,
             password : req.body.password,
             admin : req.body.admin,
             location : req.body.location,
             meta : req.body.meta
+            // _contacts : req.body._contacts
         });
 
         user.save(function (err, user) {
