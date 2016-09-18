@@ -1,5 +1,5 @@
-const 	mongoose 	= require('mongoose'),
-		Schema   	= mongoose.Schema;
+const mongoose = require('mongoose'),
+	Schema = mongoose.Schema;
 
 let userSchema = new Schema({
 	name: String,
@@ -17,16 +17,24 @@ let userSchema = new Schema({
 		type: String,
 		required: true
 	},
-	perms: Array,
+	perms: {
+		type: Array,
+		default: ["user:read","user:write"],
+	},
 	location: String,
 	meta: {
 		age: Number,
 		website: String
 	},
-	_contacts : [{ name : String, contact_id: { type: Schema.Types.ObjectId , ref : 'contact' } }]
-},
-{
-    timestamps: true
+	_contacts: [{
+		name: String,
+		contact_id: {
+			type: Schema.Types.ObjectId,
+			ref: 'contact'
+		}
+	}]
+}, {
+	timestamps: true
 });
 
 module.exports = mongoose.model('user', userSchema);

@@ -10,9 +10,24 @@ const
  * GET contacts/
  * list all contacts
  */
-router.get('/', perms.check(perms.sets.ar), function(req, res) {
+router.get('/', function(req, res) {
   debug('get - contacts/');
-  contactController.list(req, res);
+  contactController.setQuery({
+    _belongsTo: req.query.userID || null,
+    name: req.query.name || null,
+    nickname: req.query.nickname || null,
+    company : req.query.company  || null,
+    job_title: req.query.job_title || null,
+    home: req.query.home || null,
+    email: req.query.email || null,
+    mobile: req.query.mobile || null,
+    phone: req.query.phone || null,
+    address: req.query.address || null,
+    birthday: req.query.birthday || null,
+    notes: req.query.notes || null
+  },function(query){
+    contactController.list(req, res);
+  });
 });
 
 /*
@@ -21,6 +36,9 @@ router.get('/', perms.check(perms.sets.ar), function(req, res) {
  */
 router.get('/:contactID', perms.check(perms.sets.ar), function(req, res) {
   debug('get - contacts/:contactID');
+  contactController.setQuery({
+    _id : req.params.contactID
+  });
   contactController.show(req, res);
 });
 
@@ -30,7 +48,10 @@ router.get('/:contactID', perms.check(perms.sets.ar), function(req, res) {
  */
 router.post('/', perms.check(perms.sets.aw), function(req, res) {
   debug('post - contacts/');
-  contactController.create(req, res);
+  contactController.setQuery({
+    _id : req.params.contactID
+  });
+  contactController.show(req, res);
 });
 
 /*
@@ -39,8 +60,24 @@ router.post('/', perms.check(perms.sets.aw), function(req, res) {
  */
 router.put('/:contactID', perms.check(perms.sets.aw), function(req, res) {
   debug('put - contacts/:contactID');
+  contactController.catchQuery(req,res,function(query){
+    query._id = req.params.contactID;
+  });
   contactController.update(req, res);
 });
+
+/*
+ * POST contacts/:contactID
+ * post a contact
+ */
+router.post('/:contactID', perms.check(perms.sets.aw), function(req, res) {
+  debug('put - contacts/:contactID');
+  contactController.catchQuery(req,res,function(query){
+    query._id = null;
+  });
+  contactController.create(req, res);
+});
+
 
 /*
  * DELETE contacts/:contactID
@@ -48,6 +85,9 @@ router.put('/:contactID', perms.check(perms.sets.aw), function(req, res) {
  */
 router.delete('/:contactID', perms.check(perms.sets.aw), function(req, res) {
   debug('delete - contacts/:contactID');
+  contactController.setQuery({
+    _id : req.params.contactID
+  });
   contactController.remove(req, res);
 });
 

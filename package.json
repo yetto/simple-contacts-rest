@@ -8,6 +8,7 @@
     "debug": "DEBUG=error,app,controller,route,app:server,contacts:route,users:route,user:route,user:controller,contact:controller,auth:route nodemon -L ./bin/www",
     "verbose": "DEBUG=* ./bin/www",
     "test": "./node_modules/.bin/mocha -b --reporter spec",
+    "loadTest": "./node_modules/.bin/mocha './data-sets/loadTest.js' -b --reporter spec",
     "import": "node ./data-sets/import.js"
   },
   "description": "REST plus Simple Front Contacts App",

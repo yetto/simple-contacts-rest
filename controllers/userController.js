@@ -1,10 +1,21 @@
 const
-  debug            = require('debug')('user:controller'),
-  userModel        = require('../models/userModel.js'),
-  contactModel     = require('../models/contactModel.js'),
-  paging           = require('../controllers/paging.js'),
-  knowException  = require('../controllers/knowExceptions.js')
-;
+    debug = require('debug')('user:controller'),
+    userModel = require('../models/userModel.js'),
+    paging = require('../controllers/paging.js'),
+    knowException = require('../controllers/knowExceptions.js');
+
+let theQuery = {};
+
+let filterQuery = function(theQuery) {
+    // POP null values from OBJ
+    for (var key in theQuery) {
+        if (theQuery.hasOwnProperty(key)) {
+            if (theQuery[key] === null) delete theQuery[key];
+        }
+    }
+    debug('Query', theQuery);
+    return (theQuery);
+};
 
 /**
  * userController.js
@@ -16,13 +27,13 @@ module.exports = {
     /**
      * userController.list()
      */
-    list: function (req, res, callback) {
+    list: function(req, res, callback) {
 
         debug('list');
 
-        userModel.find(function (err, users) {
+        userModel.find(filterQuery(theQuery), function(err, users) {
             if (err) {
-                let exception = knowException(err,'Error when getting user.');
+                let exception = knowException(err, 'Error when getting user.');
                 debug(exception);
                 return res.status(exception.code).json({
                     message: exception.message,
@@ -40,23 +51,12 @@ module.exports = {
     /**
      * userController.show()
      */
-    show: function (req, res, callback) {
+    show: function(req, res, callback) {
 
-        let query = {
-            _id  : req.body.userID || req.params.userID || res.locals.userID || null,
-            email   : req.body.email || req.params.email || res.locals.email || null
-        };
 
-        for(var key in query){
-            if (query.hasOwnProperty(key)) {
-                if (query[key] === null)
-                    delete query[key];
-            }
-        }
+        debug('show');
 
-        debug('show',query);
-
-        userModel.findOne(query, function (err, user) {
+        userModel.findOne(filterQuery(theQuery), function(err, user) {
 
             if (err) {
                 return res.status(500).json({
@@ -80,23 +80,16 @@ module.exports = {
     /**
      * userController.create()
      */
-    create: function (req, res, callback) {
+    create: function(req, res, callback) {
 
-        debug('create');
 
-        let user = new userModel({
-            name : req.body.name,
-            username : req.body.username,
-            email : req.body.email,
-            password : req.body.password,
-            perms : ['user:read','user:write'],
-            location : req.body.location,
-            meta : req.body.meta
-            // _contacts : req.body._contacts
-        });
-        user.save(function (err, user) {
+        let user = new userModel(filterQuery(theQuery));
+
+        debug('create', user);
+
+        user.save(function(err, user) {
             if (err) {
-                let exception = knowException(err,'Error when getting user.');
+                let exception = knowException(err, 'Error when creating user.');
                 debug(exception);
                 return res.status(exception.code).json({
                     message: exception.message,
@@ -114,15 +107,19 @@ module.exports = {
     /**
      * userController.update()
      */
-    update: function (req, res, callback) {
+    update: function(req, res, callback) {
 
-        let userID = req.params.userID ? req.params.userID : res.locals.userID;
-        debug('update',userID);
+        debug('update');
 
-        userModel.findOne({_id: userID}, function (err, user) {
+        let query = filterQuery(theQuery),
+            id = query._id;
+
+        delete query._id;
+
+        userModel.findByIdAndUpdate(id, { $set: query }, { new: true }, function(err, user) {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when getting user',
+                    message: 'Error when updating user.',
                     error: err
                 });
             }
@@ -131,52 +128,69 @@ module.exports = {
                     message: 'No such user'
                 });
             }
+            if (typeof callback === 'function') {
+                callback(user);
+            } else {
+                return res.json(user);
+            }
 
-            user.name = req.body.name ? req.body.name : user.name;
-            user.username = req.body.username ? req.body.username : user.username;
-            user.email = req.body.email ? req.body.email : user.email;
-            user.password = req.body.password ? req.body.password : user.password;
-            user.admin = req.body.admin ? req.body.admin : user.admin;
-            user.location = req.body.location ? req.body.location : user.location;
-            user.meta = req.body.meta ? req.body.meta : user.meta;
-            if (typeof req.body._contacts === 'object') user._contacts.push(req.body._contacts ? req.body._contacts : user._contacts);
-
-            user.save(function (err, user) {
-                if (err) {
-                    return res.status(500).json({
-                        message: 'Error when updating user.',
-                        error: err
-                    });
-                }
-                if (typeof callback === 'function') {
-                    callback(user);
-                } else {
-                    return res.json(user);
-                }
-            });
         });
+
     },
 
     /**
      * userController.remove()
      */
-    remove: function (req, res, callback) {
+    remove: function(req, res, callback) {
 
-        let userID = req.params.userID ? req.params.userID : res.locals.userID;
-        debug('remove',userID);
+        debug('remove');
 
-        userModel.findByIdAndRemove(userID, function (err, user) {
+        let userID = filterQuery(theQuery)._id;
+
+        userModel.findByIdAndRemove(userID, function(err, user) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when deleting the user.',
                     error: err
                 });
             }
-           if (typeof callback === 'function') {
+            if (typeof callback === 'function') {
                 callback(user);
             } else {
                 return res.status(204).json();
             }
         });
-    }
+    },
+
+    /*
+     * userController.setQuery()
+     * Allows to manually set query parameters
+     */
+    setQuery: function(obj, callback) {
+        objQuery = (typeof obj != 'object') ? {} : obj;
+        theQuery = objQuery;
+        if (typeof callback === 'function') {
+            callback(theQuery);
+        }
+    }, // END setQuery
+
+    /*
+     * userController.catchQuery()
+     * Catches all pertinent information
+     */
+    catchQuery: function(req, res, callback) {
+            theQuery.name = req.body.name ? req.body.name : null;
+            theQuery.username = req.body.username ? req.body.username : null;
+            theQuery.email = req.body.email ? req.body.email : null;
+            theQuery.password = req.body.password ? req.body.password : null;
+            theQuery.location = req.body.location ? req.body.location : null;
+            theQuery.meta = req.body.meta ? req.body.meta : null;
+            if (typeof req.body._contacts === 'object')
+                theQuery._contacts.push(req.body._contacts ? req.body._contacts : null);
+            if (typeof callback === 'function') {
+                callback(theQuery);
+            }
+        } // END catchQuery
+
+
 };

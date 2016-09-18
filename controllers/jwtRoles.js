@@ -7,13 +7,13 @@ let badPerms = {
 };
 
 let permSets = {
-    all : ['admin:read','admin:write','user:read','user:write'],
-    arw : ['admin:read','admin:write'],
-    aw : ['admin:write'],
-    ar : ['admin:read'],
-    urw : ['user:read','user:write','admin:read','admin:write'],
-    uw : ['user:write','admin:write'],
-    ur : ['user:read','admin:read']
+    all : ["admin:read","admin:write","user:read","user:write"],
+    arw : ["admin:read","admin:write"],
+    aw : ["admin:write"],
+    ar : ["admin:read"],
+    urw : ["user:read","user:write","admin:read","admin:write"],
+    uw : ["user:write","admin:write"],
+    ur : ["user:read","admin:read"]
 }
 
 var debug;
@@ -45,10 +45,10 @@ function verify(req, res, callback) {
     req.query.token,
 
     SECRET =
-      process.env.SECRET ||  'createDotEnvFile',
+      process.env.SECRET || 'createDotEnvFile',
 
     ADMIN_SECRET =
-      process.env.ADMIN_SECRET ||  'pleaseCreateDotEnvFile'
+      process.env.ADMIN_SECRET || 'pleaseCreateDotEnvFile'
   ;
 
   jwt.verify(token, process.env.SECRET, function(err, decoded) {

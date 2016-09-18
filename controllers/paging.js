@@ -4,42 +4,48 @@
 ##################### */
 
 const
-  url         = require('url')
-;
+  url = require('url');
 
 let
-  per_page    = process.env.PER_PAGE,
-  page        = 1,
-  limit       = per_page
-;
+  per_page = process.env.PER_PAGE,
+  page = 1,
+  limit = per_page;
 
-function pagimate(docs){
+function pagimate(docs) {
+
+
 
 } // END pagimate
 
-function init_paging(req, res){
+function init_paging(req, res) {
 
-    let     page        = parseInt( req.query.page ),
-            per_size    = parseInt( req.query.per_size ),
-            limit       = page > 0 ? (( page - 1 ) * size) : 0;
-
+  let page = parseInt(req.query.page),
+    per_size = parseInt(req.query.per_size),
+    limit = page > 0 ? ((page - 1) * size) : 0;
 
 } // END pagimate
 
 /* ### SETTERS ### */
-function set_per_page(){
+function set_per_page() {
+
+
+
 }
-function set_page(){
+
+function set_page() {
+
+
+
 }
 
 
 module.exports = {
-    init_paging     : init_paging,
-    pagimate        : pagimate,
-    set_per_page    : set_per_page,
-    set_page        : set_page,
-    limit           : limit,
-    page            : page
+  init_paging: init_paging,
+  pagimate: pagimate,
+  set_per_page: set_per_page,
+  set_page: set_page,
+  limit: limit,
+  page: page
 }
 
 

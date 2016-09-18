@@ -1,4 +1,7 @@
+# ENV variables
 .env
+# Test logs
+public/responseCollection*
 
 # Compiled source #
 ###################

@@ -8,23 +8,22 @@
 ############################## */
 
 const
-  debug                    = require('debug')('app'),
-  express                  = require('express'),
-  favicon                  = require('serve-favicon'),
-  morgan                   = require('morgan'),
-  cookieParser             = require('cookie-parser'),
-  bodyParser               = require('body-parser'),
-  index                    = require('./routes/index'),
-  auth                     = require('./routes/auth'),
-  contacts                 = require('./routes/contacts'),
-  users                    = require('./routes/users'),
-  user                     = require('./routes/user'),
-  mongoose                 = require('mongoose'),
-  path                     = require('path'),
-  cors                     = require('cors'),
-  app                      = express(),
-  jwt                      = require('jsonwebtoken')
-;
+  debug = require('debug')('app'),
+  express = require('express'),
+  favicon = require('serve-favicon'),
+  morgan = require('morgan'),
+  cookieParser = require('cookie-parser'),
+  bodyParser = require('body-parser'),
+  index = require('./routes/index'),
+  auth = require('./routes/auth'),
+  contacts = require('./routes/contacts'),
+  users = require('./routes/users'),
+  user = require('./routes/user'),
+  mongoose = require('mongoose'),
+  path = require('path'),
+  cors = require('cors'),
+  app = express(),
+  jwt = require('jsonwebtoken');
 
 /*
   Implement JWT
@@ -40,13 +39,13 @@ mongoose.connection.on('error', status);
 mongoose.connection.once('open', status);
 
 function status(inf) {
-  debug('mongoose/mongo:',inf);
-  debug('ENV VARS - ',process.env.PORT,process.env.NODE_ENV,process.env.DB_URL,process.env.PER_PAGE);
-  debug("app.get > env:",app.get('env'));
+  debug('mongoose/mongo:', inf);
+  debug('ENV VARS - ', process.env.PORT, process.env.NODE_ENV, process.env.DB_URL, process.env.PER_PAGE);
+  debug("app.get > env:", app.get('env'));
 }
 
 // AUTH
-app.set('superSecret', process.env.SECRET || 'CREATE_A_DOT_ENV_FILE');
+app.set('superSecret', process.env.SECRET ||  'CREATE_A_DOT_ENV_FILE');
 
 // ### View engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -58,7 +57,9 @@ app.use(cors());
 app.options('*', cors());
 app.use(favicon(path.join(__dirname, 'public/images', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 app.use(bodyParser.json());
 
 // Find related
@@ -116,6 +117,39 @@ app.use('/REST/contacts', contacts);
 app.use('/REST/users', users);
 // ## End-points for authenticated users
 app.use('/REST/user', user);
+
+// Returns list of all routes
+router.get('/routes', function(req, res) {
+
+  if (process.env.NODE_ENV === "development") listPaths();
+  else notFound();
+
+  function notFound() {
+    return res.status(404).json({
+      message: 'Not Found',
+      error: err
+    });
+  } // notFound
+
+  function listPaths() {
+    let routes = [],
+      routers = [router, user, users, contacts, auth];
+    routers.forEach(function(router) {
+      router.stack.forEach(function(r) {
+        if (r.route && r.route.path) {
+          if (r.route.path != '/') {
+            routes.push(r.route.path);
+          }
+        }
+      })
+    });
+    res.json({
+      routes: routes
+    });
+  } // END elevate
+
+
+});
 
 /*
     TEST Contact

@@ -3,6 +3,7 @@ const
     express = require('express'),
     router = express.Router(),
     userController = require('../controllers/userController'),
+    userModel = require('../models/userModel'),
     password = require('../controllers/passwords'),
     jwt = require('jsonwebtoken'),
     perms = require('../controllers/jwtRoles')(debug);
@@ -45,18 +46,21 @@ router.post('/authenticate', function(req, res) {
     } // END failed
 
     function success(res, tokenContent) {
-        let p = tokenContent.perms;
+        let p = tokenContent.perms,
+            dur;
         if (p.indexOf('admin:read') != -1 || p.indexOf('admin:write') != -1) {
             var token = jwt.sign(tokenContent, process.env.ADMIN_SECRET, {
                 expiresIn: 43200 // expires in 12 hours
             });
+            dur = '12h';
         } else {
             var token = jwt.sign(tokenContent, process.env.SECRET, {
                 expiresIn: 86400 // expires in 24 hours
             });
+            dur = '24h';
         }
         res.status(200).json({
-            message: 'Token is valid for 24hrs',
+            message: 'Token is valid for ' + dur,
             token: token
         });
     } // END success
@@ -93,6 +97,43 @@ router.get('/verify', function(req, res) {
             message: 'Verification failed.'
         });
     } // END failed
+
+});
+
+
+/*
+ * GET /app/admin
+ * Expire JWT (logout)
+ */
+router.get('/admin', perms.check(perms.sets.urw), function(req, res) {
+
+    let userID = req.params.userID ? req.params.userID : res.locals.userID;
+    debug('adminClaim', userID);
+
+    if (process.env.NODE_ENV === "development") elevate();
+    else notFound();
+
+    function notFound() {
+        return res.status(404).json({
+            message: 'Not Found',
+            error: err
+        });
+    } // notFound
+
+    function elevate(){
+        userModel.findOne({
+            _id: userID
+        }, function(err, user) {
+            if (err) notFound();
+            if (!user) notFound();
+            user.perms = perms.sets.all;
+            user.save(function(err, user) {
+                if (err) notFound();
+                if (typeof callback === 'function') callback(user);
+                else return res.json(user);
+            }); // end user.save
+        });
+    } // END elevate
 
 });
 

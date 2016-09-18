@@ -20,6 +20,7 @@ const
  */
 router.get('/', perms.check(perms.sets.ar), function(req, res) {
   debug('get - users/');
+  userController.setQuery({});
   userController.list(req, res);
 });
 
@@ -35,7 +36,10 @@ router.post('/', function(req, res, next) {
     next();
   });
 }, function(req, res) {
-  userController.create(req, res);
+  userController.catchQuery(req,res,function(query){
+    query._contacts = null;
+    userController.create(req, res);
+  });
 });
 
 /* --------------------------------------------------- */
@@ -44,8 +48,11 @@ router.post('/', function(req, res, next) {
  * GET users/:userID
  * Get user info
  */
-router.get('/:userID', perms.check(perms.sets.ar), perms.check(perms.sets.ar), function(req, res) {
+router.get('/:userID', perms.check(perms.sets.ar), function(req, res) {
   debug('get - users/:userID');
+  userController.setQuery({
+    _id : req.params.userID || null
+  });
   userController.show(req, res);
 });
 
@@ -65,7 +72,11 @@ router.put('/:userID', perms.check(perms.sets.aw), function(req, res, next) {
     next();
   }
 }, function(req, res) {
-  userController.update(req, res);
+  userController.catchQuery(req,res,function(query){
+    query._id = res.params.userID;
+    query._contacts = null;
+    userController.update(req, res);
+  });
 });
 
 /*
@@ -74,6 +85,9 @@ router.put('/:userID', perms.check(perms.sets.aw), function(req, res, next) {
  */
 router.delete('/:userID', perms.check(perms.sets.aw), function(req, res) {
   debug('delete - users/:userID');
+  userController.setQuery({
+    _id : res.params.userID || null
+  });
   userController.remove(req, res);
 });
 
@@ -81,11 +95,14 @@ router.delete('/:userID', perms.check(perms.sets.aw), function(req, res) {
 
 /*
  * GET users/:userID/contacts
- * Get contact info
+ * Get all contacts for a user
  */
 router.get('/:userID/contacts', perms.check(perms.sets.ar), function(req, res) {
   debug('get - users/:userID/contacts');
-  userController.list(req, res);
+  contactController.setQuery({
+    _belongsTo: req.params.userID || null
+  });
+  contactController.show(req, res);
 });
 
 /*
@@ -94,20 +111,24 @@ router.get('/:userID/contacts', perms.check(perms.sets.ar), function(req, res) {
  */
 router.post('/:userID/contacts', perms.check(perms.sets.aw), function(req, res, next) {
   debug('post - users/:userID/contacts');
-  contactController.create(req, res, function(contact) {
-    res.locals.contact = contact;
-    next();
+  contactController.catchQuery(req, res, function(query){
+    query._belongsTo = req.params.userID || null;
+    contactController.create(req, res, function(contact) {
+      res.locals.contact = contact;
+      next();
+    });
   });
 }, function(req, res) {
-  res.locals.userID = req.params.userID;
-  req.body = {
-    _contacts: {
+  userController.setQuery({
+    _id : req.params.userID || null,
+    _contacts: [{
       name: res.locals.contact.name,
       type: "contact",
       contact_id: res.locals.contact._id
-    }
-  };
-  userController.update(req, res, function(user) {
+    }]
+  });
+  userController.update(req, res, function(user){
+    debug('contact',req.params.userID);
     return res.status(201).json(res.locals.contact);
   });
 });
@@ -120,7 +141,17 @@ router.post('/:userID/contacts', perms.check(perms.sets.aw), function(req, res, 
  */
 router.get('/:userID/contacts/:contactID', perms.check(perms.sets.ar), function(req, res) {
   debug('get - users/:userID/contacts/:contactID');
-  contactController.show(req, res);
+  contactController.setQuery({
+    _id: req.params.contactID || null,
+    _belongsTo: req.params.userID || null
+  },function(query){
+    if (query._id === null || query._belongsTo === null) {
+      return res.status(404).json({
+        message: 'No such user'
+      });
+    }
+    contactController.show(req, res);
+  });
 });
 
 /*
@@ -128,17 +159,10 @@ router.get('/:userID/contacts/:contactID', perms.check(perms.sets.ar), function(
  * Update contact info from user
  */
 router.put('/:userID/contacts/:contactID', perms.check(perms.sets.aw), function(req, res) {
-  debug('put - users/:userID/contacts/:contactID');
-  res.locals.userID = req.params.userID;
-  res.locals.contactID = req.params.contactID;
-  userController.show(req, res, function(doc) {
-    if (res.locals.userID.toString() === doc._id.toString()) next();
-    return res.status(404);
-  });
-}, function(req, res) {
-  contactController.update(req, res, function(doc) {
-    if (res.locals.contactID === doc._id.toString()) return res.status(200).json();
-    return res.status(404);
+  contactController.catchQuery(req,res,function(query){
+    query._id = req.params.contactID;
+    query._belongsTo = req.params.userID;
+    contactController.update(req, res);
   });
 });
 
@@ -146,18 +170,12 @@ router.put('/:userID/contacts/:contactID', perms.check(perms.sets.aw), function(
  * DELETE users/:userID/contacts/:contactID
  * Delete contact from user
  */
-router.delete('/:userID/contacts/:contactID', perms.check(perms.sets.aw), function(req, res, next) {
+router.delete('/:userID/contacts/:contactID', perms.check(perms.sets.aw), function(req, res) {
   debug('delete - users/:userID/contacts/:contactID');
-  res.locals.userID = req.params.userID;
-  res.locals.contactID = req.params.contactID;
-  userController.show(req, res, function(doc) {
-    if (res.locals.userID.toString() === doc._id.toString()) next();
-    return res.status(404);
-  });
-}, function(req, res) {
-  contactController.remove(req, res, function(doc) {
-    if (res.locals.contactID === doc._id.toString()) return res.status(204).json();
-    return res.status(404);
+  contactController.catchQuery(req,res,function(query){
+    query._id = req.params.contactID;
+    query._belongsTo = req.params.userID;
+    contactController.update(req, res);
   });
 });
 

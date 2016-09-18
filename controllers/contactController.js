@@ -1,9 +1,20 @@
-const
-    debug = require('debug')('contact:controller'),
+const debug = require('debug')('contact:controller'),
     contactModel = require('../models/contactModel.js'),
-    paging = require('../controllers/paging.js')
-;
+    paging = require('../controllers/paging.js'),
+    knowException = require('../controllers/knowExceptions.js');
 
+let theQuery = {};
+
+let filterQuery = function(theQuery){
+    // POP null values from OBJ
+    for (var key in theQuery) {
+        if (theQuery.hasOwnProperty(key)) {
+            if (theQuery[key] === null) delete theQuery[key];
+        }
+    }
+    debug('Query', theQuery);
+    return(theQuery);
+};
 
 /**
  * contactController.js
@@ -17,27 +28,14 @@ module.exports = {
      */
     list: function(req, res, callback) {
 
-        let query = {
-            _belongsTo: req.body.userID || req.params.userID || res.locals.userID || null,
-            name: req.body.name || req.params.name || res.locals.name || null,
-            company: req.body.company || req.params.company || res.locals.company || null,
-            address: req.body.address || req.params.address || res.locals.address || null,
-            birthday: req.body.birthday || req.params.birthday || res.locals.birthday || null
-        };
-
-        for(var key in query){
-            if (query.hasOwnProperty(key)) {
-                if (query[key] === null)
-                    delete query[key];
-            }
-        }
-
         debug('list');
 
-        contactModel.find(query,function(err, contacts) {
+        contactModel.find(filterQuery(theQuery), function(err, contacts) {
             if (err) {
-                return res.status(500).json({
-                    message: 'Error when getting contacts.',
+                let exception = knowException(err, 'Error when getting contacts.');
+                debug(exception);
+                return res.status(exception.code).json({
+                    message: exception.message,
                     error: err
                 });
             }
@@ -54,25 +52,9 @@ module.exports = {
      */
     show: function(req, res, callback) {
 
-        let query = {
-            _id: req.body.contactID || req.params.contactID || res.locals.contactID || null,
-            _belongsTo: req.body.userID || req.params.userID || res.locals.userID || null,
-            name: req.body.name || req.params.name || res.locals.name || null,
-            company: req.body.company || req.params.company || res.locals.company || null,
-            address: req.body.address || req.params.address || res.locals.address || null,
-            birthday: req.body.birthday || req.params.birthday || res.locals.birthday || null
-        };
+        debug('show');
 
-        for(var key in query){
-            if (query.hasOwnProperty(key)) {
-                if (query[key] === null)
-                    delete query[key];
-            }
-        }
-
-        debug('show',query);
-
-        contactModel.findOne(query, function(err, contact) {
+        contactModel.findOne(filterQuery(theQuery), function(err, contact) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting contact.',
@@ -97,31 +79,16 @@ module.exports = {
      */
     create: function(req, res, callback) {
 
+        let contact = new contactModel(filterQuery(theQuery));
 
-        userID = req.body.userID || req.params.userID || res.locals.userID || null;
-
-        debug('create','userID:',userID);
-
-        let contact = new contactModel({
-            name: req.body.name,
-            photo: req.body.photo,
-            nickname: req.body.nickname,
-            company: req.body.company,
-            jobtitle: req.body.jobtitle,
-            home: req.body.home,
-            email: req.body.email,
-            mobile: req.body.mobile,
-            address: req.body.address,
-            birthday: req.body.birthday,
-            notes: req.body.notes,
-            _belongsTo: userID,
-            _users: req.body._users
-        });
+        debug('create');
 
         contact.save(function(err, contact) {
             if (err) {
-                return res.status(500).json({
-                    message: 'Error when creating contact',
+                let exception = knowException(err, 'Error when creating contact.');
+                debug(exception);
+                return res.status(exception.code).json({
+                    message: exception.message,
                     error: err
                 });
             }
@@ -138,15 +105,17 @@ module.exports = {
      */
     update: function(req, res, callback) {
 
-        let contactID = req.params.contactID ? req.params.contactID : res.locals.contactID;
-        debug('update',contactID);
+        debug('update');
 
-        contactModel.findOne({
-            _id: contactID
-        }, function(err, contact) {
+        let query = filterQuery(theQuery),
+            id = query._id;
+
+        delete query._id;
+
+        contactModel.findByIdAndUpdate(id, { $set: query }, { new: true }, function(err, contact) {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when getting contact',
+                    message: 'Error when updating contact.',
                     error: err
                 });
             }
@@ -155,35 +124,14 @@ module.exports = {
                     message: 'No such contact'
                 });
             }
+            if (typeof callback === 'function') {
+                callback(contact);
+            } else {
+                return res.json(contact);
+            }
 
-            contact.name = req.body.name ? req.body.name : contact.name;
-            contact.photo = req.body.photo ? req.body.photo : contact.photo;
-            contact.nickname = req.body.nickname ? req.body.nickname : contact.nickname;
-            contact.company = req.body.company ? req.body.company : contact.company;
-            contact.jobtitle = req.body.jobtitle ? req.body.jobtitle : contact.jobtitle;
-            contact.home = req.body.home ? req.body.home : contact.home;
-            contact.email = req.body.email ? req.body.email : contact.email;
-            contact.mobile = req.body.mobile ? req.body.mobile : contact.mobile;
-            contact.address = req.body.address ? req.body.address : contact.address;
-            contact.birthday = req.body.birthday ? req.body.birthday : contact.birthday;
-            contact.notes = req.body.notes ? req.body.notes : contact.notes;
-            contact._belongsTo = req.body._belongsTo ? req.body._belongsTo : contact._belongsTo;
-            contact._users = req.body._users ? req.body._users : contact._users;
-
-            contact.save(function(err, contact) {
-                if (err) {
-                    return res.status(500).json({
-                        message: 'Error when updating contact.',
-                        error: err
-                    });
-                }
-                if (typeof callback === 'function') {
-                    callback(contact);
-                } else {
-                    return res.json(contact);
-                }
-            });
         });
+
     },
 
     /**
@@ -191,8 +139,9 @@ module.exports = {
      */
     remove: function(req, res, callback) {
 
-        let contactID = req.params.contactID ? req.params.contactID : res.locals.contactID;
-        debug('remove',contactID);
+        debug('remove');
+
+        let contactID = filterQuery(theQuery)._id;
 
         contactModel.findByIdAndRemove(contactID, function(err, contact) {
             if (err) {
@@ -207,5 +156,39 @@ module.exports = {
                 return res.status(204).json();
             }
         });
-    }
+    },
+
+    /*
+     * userController.setQuery()
+     * Allows to manually set query parameters
+     */
+    setQuery: function(obj, callback) {
+        objQuery = (typeof obj != 'object') ? {} : obj;
+        theQuery = objQuery;
+        if (typeof callback === 'function') {
+            callback(theQuery);
+        }
+    }, // END setQuery
+
+    /*
+     * userController.catchQuery()
+     * Catches all pertinent information
+     */
+    catchQuery: function(req,res,callback) {
+        theQuery.name = req.body.name ? req.body.name : null;
+        theQuery.photo = req.body.photo ? req.body.photo : null;
+        theQuery.nickname = req.body.nickname ? req.body.nickname : null;
+        theQuery.company = req.body.company ? req.body.company : null;
+        theQuery.job_title = req.body.job_title ? req.body.job_title : null;
+        theQuery.home = req.body.home ? req.body.home : null;
+        theQuery.email = req.body.email ? req.body.email : null;
+        theQuery.mobile = req.body.mobile ? req.body.mobile : null;
+        theQuery.phone = req.body.phone ? req.body.phone : null;
+        theQuery.address = req.body.address ? req.body.address : null;
+        theQuery.birthday = req.body.birthday ? req.body.birthday : null;
+        theQuery.notes = req.body.notes ? req.body.notes : null;
+        if (typeof callback === 'function') {
+            callback(theQuery);
+        }
+    } // END catchQuery
 };
