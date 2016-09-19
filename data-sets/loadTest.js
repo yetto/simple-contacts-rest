@@ -2,7 +2,8 @@
 const
   supertest = require("supertest"),
   should = require("should"),
-  dom = 'http://localhost:8080',
+  //dom = 'http://localhost:8080',
+  dom = 'https://simple-contacts-rest.herokuapp.com',
   server = supertest.agent(dom),
   users = require("./users.json"),
   contacts = require("./contacts_100.json");
@@ -19,7 +20,8 @@ let
   testC = {},
   token = null,
   iU = 1,
-  iC = 1;
+  iC = 1,
+  waitFor = 5000;
 
 /*
  * Load test
@@ -65,7 +67,7 @@ function newUser(user, contacts) {
         userID = res.body._id;
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  1a.- should POST credentials and login in successfully
@@ -87,7 +89,7 @@ function newUser(user, contacts) {
         token = res.body.token;
         done();
       });
-  });
+  }).timeout(waitFor);
 
   for (var contact of contacts) {
 
@@ -113,7 +115,7 @@ function newUser(user, contacts) {
             contactID = res.body._id || null;
             done();
           });
-      });
+      }).timeout(waitFor);
 
   } // END newUser
 

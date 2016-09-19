@@ -2,7 +2,8 @@ const
   fs = require('fs'),
   supertest = require("supertest"),
   should = require("should"),
-  dom = 'http://localhost:8080',
+  //dom = 'http://localhost:8080',
+  dom = 'https://simple-contacts-rest.herokuapp.com',
   server = supertest.agent(dom),
   password = require('../controllers/passwords.js');
 
@@ -17,7 +18,8 @@ let
   adminTest = true,
   responseCollection = [],
   logLevel = 'req_res', // res | req | req_res
-  randVal = function(){ return Math.random().toString(36).substring(20) };
+  randVal = function(){ return Math.random().toString(36).substring(20) },
+  waitFor = 5000;
 
 /*
   TEST Contact
@@ -95,7 +97,7 @@ if (userTest) {
         userID = res.body._id;
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  2.- should POST credentials and login in successfully
@@ -120,7 +122,7 @@ if (userTest) {
         token = res.body.token;
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  3.- should GET a token verified
@@ -138,7 +140,7 @@ if (userTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  4.- should PUT updated user info
@@ -170,7 +172,7 @@ if (userTest) {
         res.body._id.should.equal(userID);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  5.- should POST a NEW contact for a user
@@ -198,7 +200,7 @@ if (userTest) {
         contactID = res.body._id;
         done();
       });
-  });
+  }).timeout(waitFor);
 
 
   /*
@@ -216,7 +218,7 @@ if (userTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  7.- should GET all AUTH USER contacts
@@ -233,7 +235,7 @@ if (userTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  8.- should GET an AUTH USER contact information
@@ -250,7 +252,7 @@ if (userTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  9.- should DELETE user contact
@@ -267,7 +269,7 @@ if (userTest) {
         res.status.should.equal(204);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  10.- should DELETE himself
@@ -290,7 +292,7 @@ if (userTest) {
           writeLog(responseCollection);
           done();
         });
-    });
+    }).timeout(waitFor);
   }
 
 } // END userTest ON//OFF
@@ -341,7 +343,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  2.- should POST credentials and login in successfully
@@ -366,7 +368,7 @@ if (adminTest) {
         token = res.body.token;
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *  3.- should GET a token verified
@@ -384,7 +386,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   4.- should POST a NEW contact for a user
@@ -412,7 +414,7 @@ if (adminTest) {
         contactID = res.body._id;
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   5.- should GET all users
@@ -431,7 +433,7 @@ if (adminTest) {
         res.body.should.be.an.Array();
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   6.- should GET a user info
@@ -450,7 +452,7 @@ if (adminTest) {
         res.body._id.should.equal(userID);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   7.- should GET all contacts for a user
@@ -467,7 +469,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   8.- should POST a contact for a user
@@ -495,7 +497,7 @@ if (adminTest) {
         contactID = res.body._id;
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   9 .- should PUT diferent information for that contact
@@ -524,7 +526,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   10 .- should GET information from a user contact
@@ -541,7 +543,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   11 .- should GET all contacts
@@ -555,7 +557,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
 
   /*
@@ -585,7 +587,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   13 .- should POST a contact not assingned to a user
@@ -604,7 +606,7 @@ if (adminTest) {
         res.status.should.equal(201);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   14 .- should GET a contact not assingned to a user
@@ -621,7 +623,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   14 .- should DELETE a contact not assingned to a user
@@ -638,7 +640,7 @@ if (adminTest) {
         res.status.should.equal(204);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   15 .- should DELETE a contact from a user
@@ -655,7 +657,7 @@ if (adminTest) {
         res.status.should.equal(200);
         done();
       });
-  });
+  }).timeout(waitFor);
 
   /*
    *   16 .- should DELETE himself
@@ -674,7 +676,7 @@ if (adminTest) {
         writeLog(responseCollection);
         done();
       });
-  });
+  }).timeout(waitFor);
 
 } // END adminTest ON/OFF
 
