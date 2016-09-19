@@ -1,3 +1,5 @@
+"use strict"
+
 const
   bcrypt = require('bcrypt'),
   salt = bcrypt.genSaltSync(10)

@@ -1,12 +1,12 @@
+
 const
     debug = require('debug')('user:controller'),
     userModel = require('../models/userModel.js'),
-    paging = require('../controllers/paging.js'),
     knowException = require('../controllers/knowExceptions.js');
 
-let theQuery = {};
+var theQuery = {};
 
-let filterQuery = function(theQuery) {
+var filterQuery = function(theQuery) {
     // POP null values from OBJ
     for (var key in theQuery) {
         if (theQuery.hasOwnProperty(key)) {
@@ -32,20 +32,23 @@ module.exports = {
         debug('list');
 
         userModel.find(filterQuery(theQuery), function(err, users) {
-            if (err) {
-                let exception = knowException(err, 'Error when getting user.');
-                debug(exception);
-                return res.status(exception.code).json({
-                    message: exception.message,
-                    error: err
-                });
-            }
-            if (typeof callback === 'function') {
-                callback(users);
-            } else {
-                return res.json(users);
-            }
-        });
+                if (err) {
+                    var exception = knowException(err, 'Error when getting user.');
+                    debug(err,exception);
+                    return res.status(exception.code).json({
+                        message: exception.message,
+                        error: err
+                    });
+                }
+                if (typeof callback === 'function') {
+                    callback(users);
+                } else {
+                    return res.json(users);
+                }
+            }).
+            limit(50).
+            sort('-createdAt').
+            select({password:0,perms:0});
     },
 
     /**
@@ -59,6 +62,7 @@ module.exports = {
         userModel.findOne(filterQuery(theQuery), function(err, user) {
 
             if (err) {
+                debug('show',err);
                 return res.status(500).json({
                     message: 'Error when getting user.',
                     error: err
@@ -74,7 +78,8 @@ module.exports = {
             } else {
                 return res.json(user);
             }
-        });
+        }).
+        select({password:0,perms:0});
     },
 
     /**
@@ -83,19 +88,25 @@ module.exports = {
     create: function(req, res, callback) {
 
 
-        let user = new userModel(filterQuery(theQuery));
+        var user = new userModel(filterQuery(theQuery));
 
         debug('create', user);
 
         user.save(function(err, user) {
             if (err) {
-                let exception = knowException(err, 'Error when creating user.');
-                debug(exception);
+                var exception = knowException(err, 'Error when creating user.');
+                debug(err,exception);
                 return res.status(exception.code).json({
                     message: exception.message,
                     error: err
                 });
             }
+
+            user.perms = undefined;
+            delete user['perms'];
+            user.password = undefined;
+            delete user['password'];
+
             if (typeof callback === 'function') {
                 callback(user);
             } else {
@@ -111,23 +122,37 @@ module.exports = {
 
         debug('update');
 
-        let query = filterQuery(theQuery),
+        var query = filterQuery(theQuery),
             id = query._id;
 
         delete query._id;
 
-        userModel.findByIdAndUpdate(id, { $set: query }, { new: true }, function(err, user) {
+        userModel.findByIdAndUpdate(id, {
+            $set: query
+        }, {
+            new: true
+        }, function(err, user) {
             if (err) {
-                return res.status(500).json({
-                    message: 'Error when updating user.',
+
+                var exception = knowException(err, 'Error when updating user.');
+                debug(err,exception);
+                return res.status(exception.code).json({
+                    message: exception.message,
                     error: err
                 });
+
             }
             if (!user) {
                 return res.status(404).json({
                     message: 'No such user'
                 });
             }
+
+            user.perms = undefined;
+            delete user['perms'];
+            user.password = undefined;
+            delete user['password'];
+
             if (typeof callback === 'function') {
                 callback(user);
             } else {
@@ -145,15 +170,22 @@ module.exports = {
 
         debug('remove');
 
-        let userID = filterQuery(theQuery)._id;
+        var userID = filterQuery(theQuery)._id;
 
         userModel.findByIdAndRemove(userID, function(err, user) {
             if (err) {
+                debug('remove',err);
                 return res.status(500).json({
                     message: 'Error when deleting the user.',
                     error: err
                 });
             }
+
+            user.perms = undefined;
+            delete user['perms'];
+            user.password = undefined;
+            delete user['password'];
+
             if (typeof callback === 'function') {
                 callback(user);
             } else {
@@ -167,6 +199,7 @@ module.exports = {
      * Allows to manually set query parameters
      */
     setQuery: function(obj, callback) {
+        theQuery = {};
         objQuery = (typeof obj != 'object') ? {} : obj;
         theQuery = objQuery;
         if (typeof callback === 'function') {
@@ -179,6 +212,7 @@ module.exports = {
      * Catches all pertinent information
      */
     catchQuery: function(req, res, callback) {
+            theQuery = {};
             theQuery.name = req.body.name ? req.body.name : null;
             theQuery.username = req.body.username ? req.body.username : null;
             theQuery.email = req.body.email ? req.body.email : null;

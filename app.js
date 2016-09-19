@@ -9,6 +9,7 @@
 
 const
   debug = require('debug')('app'),
+  dotenv    = require('dotenv').load(),
   express = require('express'),
   favicon = require('serve-favicon'),
   morgan = require('morgan'),
@@ -32,14 +33,19 @@ const
 
 process.title = 'contactsApp';
 
+var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
+                replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } };
+
+console.log("process.env.DB_URL: ",process.env.DB_URL);
+
 // ## MONGO DB CONNECTION
-mongoose.connect(process.env.DB_URL || "mongodb://localhost/contactsApp");
+mongoose.connect(process.env.DB_URL || "mongodb://localhost/contactsApp", options);
 
 mongoose.connection.on('error', status);
 mongoose.connection.once('open', status);
 
 function status(inf) {
-  debug('mongoose/mongo:', inf);
+  debug('mongoose/mongo:',inf || 'CONNECTION SUCCESSFUL');
   debug('ENV VARS - ', process.env.PORT, process.env.NODE_ENV, process.env.DB_URL, process.env.PER_PAGE);
   debug("app.get > env:", app.get('env'));
 }
@@ -132,7 +138,7 @@ router.get('/routes', function(req, res) {
   } // notFound
 
   function listPaths() {
-    let routes = [],
+    var routes = [],
       routers = [router, user, users, contacts, auth];
     routers.forEach(function(router) {
       router.stack.forEach(function(r) {
@@ -188,7 +194,7 @@ contacts: [ ]
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  let err = new Error('Not Found');
+  var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
@@ -221,33 +227,3 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-
-/* TEST
-  https://scotch.io/tutorials/test-a-node-restful-api-with-mocha-and-chai
-*/
-
-// API END POINTS
-let urlArr = [
-  // get/post
-  'http://nnm.box/REST/users/',
-  // get/put/delete
-  'http://nnm.box/REST/users/:id',
-  // get/post
-  'http://nnm.box/REST/users/:id/contacts',
-  // get/put/delete
-  'http://nnm.box/REST/users/:uid/contacts/:cid',
-  // get/put
-  'http://nnm.box/REST/user/',
-  // get/post
-  'http://nnm.box/REST/user/contacts/',
-  // get/put/delete
-  'http://nnm.box/REST/user/contacts/:id/',
-  // get
-  'http://nnm.box/REST/user/frequent/',
-  // get
-  'http://nnm.box/REST/user/group/',
-  // post
-  'http://nnm.box/REST/user/import/',
-  // get
-  'http://nnm.box/REST/user/export/'
-];

@@ -1,12 +1,15 @@
+"use strict"
+
 const
+  dotenv    = require('dotenv').load(),
   jwt = require('jsonwebtoken')
 ;
 
-let badPerms = {
+var badPerms = {
   message: 'Permission denied'
 };
 
-let permSets = {
+var permSets = {
     all : ["admin:read","admin:write","user:read","user:write"],
     arw : ["admin:read","admin:write"],
     aw : ["admin:write"],
@@ -18,7 +21,7 @@ let permSets = {
 
 var debug;
 
-let Perms = function(optional) {
+var Perms = function(optional) {
   this.badPerms = badPerms;
   this.sets = permSets;
   debug = optional || null;

@@ -1,4 +1,4 @@
-const
+var
     debug = require('debug')('auth:route'),
     express = require('express'),
     router = express.Router(),
@@ -6,7 +6,8 @@ const
     userModel = require('../models/userModel'),
     password = require('../controllers/passwords'),
     jwt = require('jsonwebtoken'),
-    perms = require('../controllers/jwtRoles')(debug);
+    perms = require('../controllers/jwtRoles')(debug),
+    validator = require('validator');
 
 /*
     # Consider
@@ -25,9 +26,23 @@ const
  * Return JWT (login)
  */
 router.post('/authenticate', function(req, res) {
-    debug('post - app/authenticate');
-    userController.show(req, res, function(user) {
-        let tokenContent = {
+
+    debug('post - app/authenticate',req.body.email,req.body.password);
+
+    if (!validator.isEmail(req.body.email)){
+        return res.status(418).json({
+            message: 'Bad email address'
+        });
+    }
+
+    userModel.findOne({email: req.body.email}, function(err, user) {
+        if (!user || err) {
+            debug('Auth 404',user,err);
+            return res.status(404).json({
+                message: 'No such user'
+            });
+        }
+        var tokenContent = {
             userID: user._id,
             perms: user.perms,
             location: user.location
@@ -37,7 +52,7 @@ router.post('/authenticate', function(req, res) {
             if (isMatch) success(res, tokenContent);
             else failed(res)
         });
-    }); // END userController.show
+    });
 
     function failed(res) {
         res.status(401).json({
@@ -46,7 +61,7 @@ router.post('/authenticate', function(req, res) {
     } // END failed
 
     function success(res, tokenContent) {
-        let p = tokenContent.perms,
+        var p = tokenContent.perms,
             dur;
         if (p.indexOf('admin:read') != -1 || p.indexOf('admin:write') != -1) {
             var token = jwt.sign(tokenContent, process.env.ADMIN_SECRET, {
@@ -75,7 +90,7 @@ router.get('/verify', function(req, res) {
 
     debug('get - app/verify');
 
-    let token = req.body.token || req.query.token || req.headers['x-access-token'];
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
     jwt.verify(token, process.env.SECRET, function(err, decoded) {
         if (decoded) success(decoded.perms);
@@ -107,7 +122,7 @@ router.get('/verify', function(req, res) {
  */
 router.get('/admin', perms.check(perms.sets.urw), function(req, res) {
 
-    let userID = req.params.userID ? req.params.userID : res.locals.userID;
+    var userID = req.params.userID ? req.params.userID : res.locals.userID;
     debug('adminClaim', userID);
 
     if (process.env.NODE_ENV === "development") elevate();

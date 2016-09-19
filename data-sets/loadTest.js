@@ -1,12 +1,11 @@
+
 const
-  fs = require('fs'),
   supertest = require("supertest"),
   should = require("should"),
   dom = 'http://localhost:8080',
   server = supertest.agent(dom),
-  password = require('../controllers/passwords.js'),
   users = require("./users.json"),
-  contacts = require("./contacts.json");
+  contacts = require("./contacts_100.json");
 
 /*
   CONF
@@ -15,20 +14,22 @@ const
 let
   userID = null,
   contactID = null,
-  token = null,
   responseCollection = [],
-  testU = {}
-  testC = {};
+  testU = {},
+  testC = {},
+  token = null,
+  iU = 1,
+  iC = 1;
 
 /*
-* Load test
-* 100,000 records benchmark
-*/
-for (let user of users) {
+ * Load test
+ * 100,200 records benchmark
+ */
+for (var user of users) {
   // create user
   user.name += Date.now();
-  user.email = user.name+Date.now()+"@dateDotNow.com";
-  newUser(user,contacts);
+  user.email = user.name.replace(/\s+/g, '') + "_" + Math.random().toString(36).substring(20) + "@dateDotNow.com";
+  newUser(user, contacts);
 }
 
 /*
@@ -36,7 +37,8 @@ for (let user of users) {
   |    /  \  /\  |  \     |  |__  /__`  |
   |___ \__/ /~~\ |__/     |  |___ .__/  |
 
-  100,000 records
+  100,200 records
+  1000 contacts * 100 users
 
   1.- should POST a NEW user
   1a.- should POST credentials and login in successfully
@@ -46,19 +48,20 @@ for (let user of users) {
 
 */
 
-function newUser(user,contacts) {
+function newUser(user, contacts) {
 
   /*
    *  1.- should POST a NEW user
    */
-  it("1.- (newUser) NEW user: "+user.name, function(done) {
+  it("1.- (newUser) NEW user: " + user.name, function(done) {
+    console.log("U# " + iU + "C# " + iC);
     server
-      .post('/REST/users/')
+      .post("/REST/users/")
       .send(user)
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        console.log('   - ',res.status);
+        console.log("   - ", res.status);
         userID = res.body._id;
         done();
       });
@@ -68,8 +71,10 @@ function newUser(user,contacts) {
    *  1a.- should POST credentials and login in successfully
    */
   it("1a.- (newUser) POST login in credentials successfully", function(done) {
+    console.log("U# " + iU + "C# " + iC);
+    iU++;
     server
-      .post('/app/authenticate')
+      .post("/app/authenticate")
       .send({
         email: user.email,
         password: user.password,
@@ -77,36 +82,39 @@ function newUser(user,contacts) {
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        console.log('   - ',res.status);
+        console.log("   - ", res.status);
+        token = null;
         token = res.body.token;
         done();
       });
   });
 
-  for (let contact of contacts) {
+  for (var contact of contacts) {
 
-    /*
-     *  2.- should POST 1000 new contacts
-     */
-    it("2.- (insertContact) POST NEW contact "+contact.name+" for: "+token, function(done) {
-      server
-        .post('/REST/user/contacts/')
-        .set({"x-access-token": token})
-        .send(contact)
-        .expect(404)
-        .end(function(err, res) {
-          console.log('   - ',res.status);
-          contactID = res.body._id || null;
+      /*
+       *  2.- should POST 1000 new contacts
+       */
+      it("2.- (insertContact) POST NEW contact " + contact.name, function(done) {
+        if (token === undefined || token === null) {
+          console.log("Skip "+contact.name);
           done();
-        });
-    });
+        }
+        iC++;
+        console.log("U# " + iU + "C# " + iC);
+        server
+          .post("/REST/user/contacts/")
+          .set({
+            "x-access-token": token
+          })
+          .send(contact)
+          .expect(404)
+          .end(function(err, res) {
+            console.log("   - ", res.status);
+            contactID = res.body._id || null;
+            done();
+          });
+      });
 
-  }
+  } // END newUser
 
-
-} // END newUser
-
-
-function insertContact(contact,token){
-
-} // END newUser
+}

@@ -1,11 +1,10 @@
 const debug = require('debug')('contact:controller'),
     contactModel = require('../models/contactModel.js'),
-    paging = require('../controllers/paging.js'),
     knowException = require('../controllers/knowExceptions.js');
 
-let theQuery = {};
+var theQuery = {};
 
-let filterQuery = function(theQuery){
+var filterQuery = function(theQuery){
     // POP null values from OBJ
     for (var key in theQuery) {
         if (theQuery.hasOwnProperty(key)) {
@@ -32,8 +31,8 @@ module.exports = {
 
         contactModel.find(filterQuery(theQuery), function(err, contacts) {
             if (err) {
-                let exception = knowException(err, 'Error when getting contacts.');
-                debug(exception);
+                var exception = knowException(err, 'Error when getting contacts.');
+                debug(err,exception);
                 return res.status(exception.code).json({
                     message: exception.message,
                     error: err
@@ -44,7 +43,9 @@ module.exports = {
             } else {
                 return res.json(contacts);
             }
-        });
+        }).
+        limit(50).
+        sort('-createdAt');
     },
 
     /**
@@ -56,6 +57,7 @@ module.exports = {
 
         contactModel.findOne(filterQuery(theQuery), function(err, contact) {
             if (err) {
+                debug('show',err);
                 return res.status(500).json({
                     message: 'Error when getting contact.',
                     error: err
@@ -79,13 +81,14 @@ module.exports = {
      */
     create: function(req, res, callback) {
 
-        let contact = new contactModel(filterQuery(theQuery));
+        var contact = new contactModel(filterQuery(theQuery));
 
         debug('create');
 
         contact.save(function(err, contact) {
             if (err) {
-                let exception = knowException(err, 'Error when creating contact.');
+                debug('create',err);
+                var exception = knowException(err, 'Error when creating contact.');
                 debug(exception);
                 return res.status(exception.code).json({
                     message: exception.message,
@@ -107,13 +110,14 @@ module.exports = {
 
         debug('update');
 
-        let query = filterQuery(theQuery),
+        var query = filterQuery(theQuery),
             id = query._id;
 
         delete query._id;
 
         contactModel.findByIdAndUpdate(id, { $set: query }, { new: true }, function(err, contact) {
             if (err) {
+                debug('update'.err);
                 return res.status(500).json({
                     message: 'Error when updating contact.',
                     error: err
@@ -141,10 +145,11 @@ module.exports = {
 
         debug('remove');
 
-        let contactID = filterQuery(theQuery)._id;
+        var contactID = filterQuery(theQuery)._id;
 
         contactModel.findByIdAndRemove(contactID, function(err, contact) {
             if (err) {
+                debug('remove',err);
                 return res.status(500).json({
                     message: 'Error when deleting the contact.',
                     error: err
@@ -163,6 +168,7 @@ module.exports = {
      * Allows to manually set query parameters
      */
     setQuery: function(obj, callback) {
+        theQuery = {};
         objQuery = (typeof obj != 'object') ? {} : obj;
         theQuery = objQuery;
         if (typeof callback === 'function') {
@@ -175,6 +181,7 @@ module.exports = {
      * Catches all pertinent information
      */
     catchQuery: function(req,res,callback) {
+        theQuery = {};
         theQuery.name = req.body.name ? req.body.name : null;
         theQuery.photo = req.body.photo ? req.body.photo : null;
         theQuery.nickname = req.body.nickname ? req.body.nickname : null;

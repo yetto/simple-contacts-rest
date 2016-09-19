@@ -1,4 +1,4 @@
-const
+var
   debug = require('debug')('users:route'),
   express = require('express'),
   password = require('../controllers/passwords.js'),

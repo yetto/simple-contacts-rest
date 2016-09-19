@@ -1,14 +1,16 @@
+"use strict"
+
 const
   _ = require('lodash/core');
 
-let exception = {
+var exception = {
   message: 'unhandle exception',
   code: 500
 };
 
 function _handleErrObj(err, defaultMsg) {
   if (err.message.indexOf('E11000') != -1) {
-    exception.message = 'Email and/or username is already taken.';
+    exception.message = 'Email and/or username is already in use.';
     exception.code = 406;
     return exception;
   }

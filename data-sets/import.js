@@ -1,6 +1,9 @@
 
 /* #######################################
-        Simple import script
+    Simple import script
+
+    ***** UNTESTED, MIGHT NOT WORK !!!
+
 ####################################### */
 
 const

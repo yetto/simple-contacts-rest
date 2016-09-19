@@ -1,4 +1,4 @@
-const
+var
   debug = require('debug')('contacts:route'),
   express = require('express'),
   router = express.Router(),

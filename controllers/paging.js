@@ -1,9 +1,12 @@
+"use strict"
+
 /* #####################
     Example
     https://www.npmjs.com/package/restify-mongoose#queries
 ##################### */
 
 const
+  dotenv    = require('dotenv').load(),
   url = require('url');
 
 let
@@ -19,7 +22,7 @@ function pagimate(docs) {
 
 function init_paging(req, res) {
 
-  let page = parseInt(req.query.page),
+  var page = parseInt(req.query.page),
     per_size = parseInt(req.query.per_size),
     limit = page > 0 ? ((page - 1) * size) : 0;
 

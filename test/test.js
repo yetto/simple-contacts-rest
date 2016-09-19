@@ -6,12 +6,24 @@ const
   server = supertest.agent(dom),
   password = require('../controllers/passwords.js');
 
+/*
+  CONF
+*/
+let
+  userID = null,
+  contactID = null,
+  token = null,
+  userTest = true,
+  adminTest = true,
+  responseCollection = [],
+  logLevel = 'req_res', // res | req | req_res
+  randVal = function(){ return Math.random().toString(36).substring(20) };
 
 /*
   TEST Contact
   http://nnm.box/REST/contacts/57d869a17160689f6be9cdbe
 */
-let testC = {
+var testC = {
   "name": "Denise Bradley",
   "nickname": "dbradley0",
   "company": "Trudeo",
@@ -24,32 +36,20 @@ let testC = {
   ]
 }
 
-let testC2 = {}
+var testC2 = {}
 
 /*
   TEST User
   http://nnm.box/REST/users/57d866317160689f6be9cd5a
 */
-let testU = {
+var testU = {
   name: "Wylie Wade",
-  username: "Rosanne2",
-  email: "rosanne2@gmail.com",
+  username: "Rosanne2_" + randVal(),
+  email: "wade" + "_" + randVal() + "@datedotnow.com",
   password: "EUZ78MMR7GR",
   admin: false,
   location: "22.48643, 114.92551",
 }
-
-/*
-  CONF
-  http://nnm.box/REST/users/57d866317160689f6be9cd5a
-*/
-let
-  userID = null,
-  contactID = null,
-  token = null,
-  userTest = true,
-  adminTest = true,
-  responseCollection = [];
 
 
 /*
@@ -86,10 +86,7 @@ if (userTest) {
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(201);
         res.body.name.should.equal('Wylie Wade');
         password.compare(res.body.password, 'EUZ78MMR7GR', function(err, isPasswordMatch) {
@@ -110,16 +107,13 @@ if (userTest) {
         "x-access-token": token
       })
       .send({
-        email: "rosanne2@gmail.com",
-        password: "EUZ78MMR7GR",
+        email: testU.email,
+        password: testU.password,
       })
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         res.body.message.should.equal('Token is valid for 24h');
         res.body.token.should.be.a.String();
@@ -140,10 +134,7 @@ if (userTest) {
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -153,28 +144,29 @@ if (userTest) {
    *  4.- should PUT updated user info
    */
   it("(user) should PUT updated user info", function(done) {
+    var update = {
+        name : "Wylie Wade"+randVal(),
+        username : "Rosanne2"+randVal(),
+        location : "22.0000, 114.0000"
+      };
     server
       .put('/REST/user/')
       .set({
         "x-access-token": token
       })
       .send({
-        name: "Wylie Wade UPDATE",
-        username: "Rosanne2UPDATE",
-        email: "rosanne2@gmail.com",
-        location: "22.0000, 114.0000"
+        name: update.name,
+        username: update.username,
+        location: update.location
       })
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
-        res.body.name.should.equal('Wylie Wade UPDATE');
-        res.body.username.should.equal('Rosanne2UPDATE');
-        res.body.location.should.equal("22.0000, 114.0000");
+        res.body.name.should.equal(update.name);
+        res.body.username.should.equal(update.username);
+        res.body.location.should.equal(update.location);
         res.body._id.should.equal(userID);
         done();
       });
@@ -192,12 +184,9 @@ if (userTest) {
       .send(testC)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(201);
-        let b = res.body;
+        var b = res.body;
         b.name.should.equal(testC.name);
         b.nickname.should.equal(testC.nickname);
         b.company.should.equal(testC.company);
@@ -223,10 +212,7 @@ if (userTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -243,10 +229,7 @@ if (userTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -263,10 +246,7 @@ if (userTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -283,10 +263,7 @@ if (userTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(204);
         done();
       });
@@ -360,10 +337,7 @@ if (adminTest) {
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -379,16 +353,13 @@ if (adminTest) {
         "x-access-token": token
       })
       .send({
-        email: "rosanne2@gmail.com",
-        password: "EUZ78MMR7GR",
+        email: testU.email,
+        password: testU.password,
       })
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         res.body.message.should.equal('Token is valid for 12h');
         res.body.token.should.be.a.String();
@@ -409,10 +380,7 @@ if (adminTest) {
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -430,12 +398,9 @@ if (adminTest) {
       .send(testC)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(201);
-        let b = res.body;
+        var b = res.body;
         b.name.should.equal(testC.name);
         b.nickname.should.equal(testC.nickname);
         b.company.should.equal(testC.company);
@@ -461,10 +426,7 @@ if (adminTest) {
       .expect("Content-type", /json/)
       .expect(200)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         res.body.should.be.an.Array();
         done();
@@ -483,10 +445,7 @@ if (adminTest) {
       .expect("Content-type", /json/)
       .expect(200)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         res.body._id.should.equal(userID);
         done();
@@ -504,10 +463,7 @@ if (adminTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -525,12 +481,9 @@ if (adminTest) {
       .send(testC)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(201);
-        let b = res.body;
+        var b = res.body;
         b.name.should.equal(testC.name);
         b.nickname.should.equal(testC.nickname);
         b.company.should.equal(testC.company);
@@ -567,10 +520,7 @@ if (adminTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -587,10 +537,7 @@ if (adminTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -604,10 +551,7 @@ if (adminTest) {
       .get('/REST/contacts/')
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -637,10 +581,7 @@ if (adminTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -658,10 +599,7 @@ if (adminTest) {
       .send(testC)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         testC2._id = res.body._id;
         res.status.should.equal(201);
         done();
@@ -679,10 +617,7 @@ if (adminTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -699,10 +634,7 @@ if (adminTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(204);
         done();
       });
@@ -719,10 +651,7 @@ if (adminTest) {
       })
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(200);
         done();
       });
@@ -740,10 +669,7 @@ if (adminTest) {
       .expect("Content-type", /json/)
       .expect(404)
       .end(function(err, res) {
-        responseCollection.push(JSON.stringify({
-          res: res.body,
-          whole: res
-        }));
+        responseCollection.push(logit(res, logLevel));
         res.status.should.equal(204);
         writeLog(responseCollection);
         done();
@@ -763,7 +689,7 @@ if (adminTest) {
 */
 function writeLog(responseCollection) {
 
-  var path = '/home/node/simple-contacts-rest/public/responseCollection_'+Date.now()+'.txt';
+  var path = 'public/responseCollection_' + Date.now() + '.txt';
 
   fs.writeFile(path, responseCollection, function(err) {
     if (err) {
@@ -773,3 +699,21 @@ function writeLog(responseCollection) {
   });
 
 } // END writeLog
+
+
+function logit(res, logLevel) {
+  switch (logLevel) {
+    case 'req_res':
+      return JSON.stringify({
+        res: res.body,
+        whole: res
+      });
+    case 'req':
+      return JSON.stringify(res);
+    case 'res':
+      return JSON.stringify({
+        PATH: res.req.method+' / '+res.req.path,
+        res: res.body
+    });
+  }
+}
